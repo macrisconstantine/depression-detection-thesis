@@ -55,13 +55,13 @@
             <div class="col-auto">
                 <!-- Button to navigate to the second template -->
                 <form method="get" action="{% url 'mistral' %}">
-                    <button class="btn btn-secondary m-2 p-3" type="submit"><span class="lead">Mistral 7B</span></button>
+                    <button class="btn btn-secondary m-2 p-3" type="submit" disabled><span class="lead">Mistral 7B</span></button>
                 </form>
             </div>
             <div class="col-auto">
                 <!-- Button to navigate to the second template -->
                 <form method="get" action="{% url 'wizard' %}">
-                    <button class="btn btn-dark m-2 p-3" type="submit"><span class="lead">Wizard</span></button>
+                    <button class="btn btn-secondary m-2 p-3" type="submit" disabled><span class="lead">Wizard</span></button>
                 </form>
             </div>
         </div>
@@ -70,7 +70,7 @@
     <div class="d-flex justify-content-center pt-4">
         <form class="m-2" method="post" action="{% url 'wizard' %}">
             <div>
-                <h5 style="text-align: center;">Wizard LLM Interface</h5>
+                <h5 style="text-align: center;">Wizard Model Interface</h5>
             </div>
             {% csrf_token %}
             <textarea style="width: 40vw; height: 25vh; resize: none;"

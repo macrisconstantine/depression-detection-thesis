@@ -17,14 +17,17 @@ from random import shuffle
 
 from gpt4all import GPT4All
 
-
+# Assign variables and class labels
 wordnet_lemmatizer = WordNetLemmatizer()
 WINDOWS_SIZE = 10
 labels = ["no", "mild", "moderate", "moderately severe", "severe"]
 num_classes = len(labels)
 
+# Ignore console warnings
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 warnings.filterwarnings("ignore")
+
+# Read the transcriptsall.csv file to a dataframe and assign column names and types
 all_participants = pd.read_csv("mainUI/transcriptsall.csv", sep=",")
 all_participants.columns = ["index", "personId", "question", "answer"]
 all_participants = all_participants.astype(
@@ -87,7 +90,7 @@ def text_to_wordlist(text, remove_stopwords=True, stem_words=False):
     # Return a list of words
     return text
 
-
+# Make a wordlist with and without stopwords from the answers in all interview transcript
 all_participants_mix = all_participants.copy()
 all_participants_mix["answer"] = all_participants_mix.apply(
     lambda row: text_to_wordlist(row.answer).split(), axis=1
@@ -97,6 +100,8 @@ all_participants_mix_stopwords = all_participants.copy()
 all_participants_mix_stopwords["answer"] = all_participants_mix_stopwords.apply(
     lambda row: text_to_wordlist(row.answer, remove_stopwords=False).split(), axis=1
 )
+
+# Find the number of unique words in the wordlists
 words = [w for w in all_participants_mix["answer"].tolist()]
 words = set(itertools.chain(*words))
 vocab_size = len(words)
@@ -105,6 +110,7 @@ words_stop = [w for w in all_participants_mix_stopwords["answer"].tolist()]
 words_stop = set(itertools.chain(*words_stop))
 vocab_size_stop = len(words_stop)
 
+# Tokenize the answers in the wordlists
 windows_size = WINDOWS_SIZE
 tokenizer = Tokenizer(num_words=vocab_size)
 tokenizer.fit_on_texts(all_participants_mix["answer"])
@@ -125,11 +131,11 @@ all_participants_mix_stopwords["t_answer"] = tokenizer.texts_to_sequences(
 word_index = tokenizer.word_index
 word_size = len(word_index)
 
+# Load the saved files with the previously trained LSTM models
 model1 = load_model("mainUI/models/model_glove_lstm_b.h5")
 model2 = load_model("mainUI/models/model_glove_2lstm_b.h5")
-# model3 = GPT4All("C:\\Users\\comac\\AppData\\Local\\nomic.ai\\GPT4All\\mistral-7b-instruct-v0.1.Q4_0.gguf", allow_download=False)
-# model4 = GPT4All("C:\\Users\\comac\\AppData\\Local\\nomic.ai\\GPT4All\\wizardlm-13b-v1.2.Q4_0.gguf", allow_download=False)
 
+# Take input text and feed it to the given model to get a depression severity class prediction
 def test_model(text, model):
     word_list = text_to_wordlist(text)
     sequences = tokenizer.texts_to_sequences([word_list])
@@ -145,31 +151,36 @@ def test_model(text, model):
         + labels[predicted_class]
         + " risk of depression."
     )
-
-def test_llm(text, model):         
-    sysprompt = "use one word to classify depression severity of the input text: no, mild, moderate, moderately severe, or severe risk of depression"
-    with model.chat_session(sysprompt):
-        response1 = model.generate(text) 
-        return (
-        "\nThe provided text suggests "
-        + model.current_chat_session.pop()['content'].lower()
-        + " risk of depression."
-        )
-        
+    
+# The following functions are called in the LoadModel.py file to test the models 
 def test_model1(text):
     return test_model(text, model1)
 
 def test_model2(text):
     return test_model(text, model2)
 
+# These following lines are commented out to avoid downloading the LLMs to the user's machine and to avoid any file reference errors 
+# model3 = GPT4All("C:\\Users\\comac\\AppData\\Local\\nomic.ai\\GPT4All\\mistral-7b-instruct-v0.1.Q4_0.gguf", allow_download=False)
+# model4 = GPT4All("C:\\Users\\comac\\AppData\\Local\\nomic.ai\\GPT4All\\wizardlm-13b-v1.2.Q4_0.gguf", allow_download=False)
+
+# def test_llm(text, model):         
+#     sysprompt = "use one word to classify depression severity of the input text: no, mild, moderate, moderately severe, or severe risk of depression"
+#     with model.chat_session(sysprompt):
+#         response1 = model.generate(text) 
+#         return (
+#         "\nThe provided text suggests "
+#         + model.current_chat_session.pop()['content'].lower()
+#         + " risk of depression."
+#         )
+        
 # def test_model3(text):
 #     return test_llm(text, model3)
 
 # def test_model4(text):
 #     return test_llm(text, model4)
 
-    
 
+# The following lines were for testing purposes only
 # def menu(model):
 #     sen = ""
 #     while sen != "q":

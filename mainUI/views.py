@@ -1,14 +1,19 @@
 from django.shortcuts import render
 
-from .LoadModel import test_model1, test_model2, test_model3, test_model4
-# Create your views here.
+from .LoadModel import test_model1, test_model2
+
+# These models are not imported since the the LLMS are not used in this portable version of the application
+# , test_model3, test_model4
+
+
+# Here are the definitions of the functions (views) that are called in the LoadModel.py file
 
 def index(request):
     result = None
 
     if request.method == 'POST':
         input_data = request.POST.get('input_data')
-        result = test_model1(input_data)  # Call your Python script function
+        result = test_model1(input_data)  # Call the Python script function
 
     return render(request, 'mainUI/index.html', {'result': result})
 
